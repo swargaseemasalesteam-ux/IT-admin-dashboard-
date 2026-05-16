@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Admin – Inventory & Helpdesk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c12;
+    --surface: #10131d;
+    --surface2: #161a27;
+    --surface3: #1c2133;
+    --border: #222840;
+    --border2: #2e3654;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,0.12);
+    --accent2: #a78bfa;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text: #dde4f0;
+    --text2: #7c8aaa;
+    --text3: #3e4a65;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --sidebar-w: 220px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 200;
+    transition: transform 0.25s;
+  }
+
+  .sidebar-logo {
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-logo-main {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .sidebar-logo-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 3px;
+    padding-left: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    text-transform: uppercase;
+    padding: 0.75rem 1.25rem 0.35rem;
+    font-weight: 600;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.6rem 1.25rem;
+    font-size: 13.5px;
+    color: var(--text2);
+    cursor: pointer;
+    border-radius: 0;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-item.active {
+    color: var(--accent);
+    background: var(--accent-glow);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  .nav-item svg { flex-shrink: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 100px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* ── Main content ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 1.75rem;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .topbar-sub {
+    font-size: 13px;
+    color: var(--text3);
+  }
+
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover { background: #2563eb; border-color: #2563eb; color: white; }
+
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .btn-danger { border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: rgba(239,68,68,0.1); }
+
+  /* ── Page wrapper ── */
+  .page {
+    display: none;
+    padding: 1.75rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .page.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    font-family: 'Space Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-meta {
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .stat-card.blue .stat-value { color: var(--accent); }
+  .stat-card.green .stat-value { color: var(--success); }
+  .stat-card.amber .stat-value { color: var(--warning); }
+  .stat-card.red .stat-value { color: var(--danger); }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title span {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text3);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td {
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text3);
+  }
+
+  .empty-state p { font-size: 14px; margin-top: 0.5rem; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .badge-open { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
+  .badge-progress { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+  .badge-resolved { background: rgba(16,185,129,0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+  .badge-high { background: rgba(239,68,68,0.12); color: var(--danger); }
+  .badge-medium { background: rgba(245,158,11,0.12); color: var(--warning); }
+  .badge-low { background: rgba(16,185,129,0.12); color: var(--success); }
+
+  .badge-cat {
+    background: var(--surface3);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 400;
+  }
+
+  /* ── Inventory ── */
+  .inv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .inv-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+
+  .inv-card:hover { border-color: var(--border2); }
+
+  .inv-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+
+  .inv-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--surface3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .inv-card-actions { display: flex; gap: 4px; }
+
+  .inv-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .inv-category-label {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .inv-qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .inv-qty-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .inv-qty-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .inv-condition {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .cond-good { background: rgba(16,185,129,0.12); color: var(--success); }
+  .cond-fair { background: rgba(245,158,11,0.12); color: var(--warning); }
+  .cond-poor { background: rgba(239,68,68,0.12); color: var(--danger); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 480px;
+    padding: 1.5rem;
+    animation: modalIn 0.2s ease;
+  }
+
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-close {
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 20px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .modal label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 5px;
+  }
+
+  .modal input, .modal select, .modal textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    padding: 0.6rem 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+
+  .modal input:focus, .modal select:focus, .modal textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .modal input::placeholder, .modal textarea::placeholder { color: var(--text3); }
+
+  .modal select option { background: var(--surface2); color: var(--text); }
+
+  .modal textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+
+  .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar input, .filter-bar select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 6px 12px;
+    outline: none;
+    appearance: none;
+    height: 34px;
+    transition: border-color 0.15s;
+  }
+
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+  .filter-bar input::placeholder { color: var(--text3); }
+  .filter-bar input { width: 200px; }
+  .filter-bar select option { background: var(--surface2); }
+
+  /* Complaint detail panel */
+  .detail-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    font-size: 13px;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+  }
+
+  .detail-row:last-child { border-bottom: none; }
+
+  .detail-label { color: var(--text3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 1px; }
+
+  .detail-value { color: var(--text); }
+
+  /* Hamburger for mobile */
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 199;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop.open { display: block; }
+    .main { margin-left: 0; }
+    .hamburger { display: flex; }
+    .page { padding: 1.25rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .inv-grid { grid-template-columns: 1fr; }
+    .modal-row { grid-template-columns: 1fr; }
+    .filter-bar input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-main">
+      <span class="logo-dot"></span>
+      IT ADMIN
+    </div>
+    <div class="sidebar-logo-sub">Operations Dashboard</div>
+  </div>
+
+  <div class="nav-section-label">Overview</div>
+  <div class="nav-item active" onclick="showPage('dashboard', this)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+
+  <div class="nav-section-label">Helpdesk</div>
+  <div class="nav-item" onclick="showPage('complaints', this)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Complaints
+    <span class="nav-badge" id="openBadge">0</span>
+  </div>
+
+  <div class="nav-section-label">Inventory</div>
+  <div class="nav-item" onclick="showPage('inventory', this)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    Inventory
+  </div>
+  <div class="nav-item" onclick="showPage('categories', this)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Categories
+  </div>
+  <div class="nav-item" onclick="showPage('desks', this)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+    Desk Tracker
+  </div>
+
+  <div class="sidebar-footer">
+    Connected to Google Sheets<br>
+    <span style="color: var(--success);">●</span> Live sync enabled
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-sub" id="topbarSub">IT Administration Overview</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-sm" onclick="syncData()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── DASHBOARD PAGE ─── -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card red">
+        <div class="stat-label">Open Tickets</div>
+        <div class="stat-value" id="s-open">0</div>
+        <div class="stat-meta">Needs attention</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value" id="s-progress">0</div>
+        <div class="stat-meta">Being handled</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" id="s-resolved">0</div>
+        <div class="stat-meta">This month</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Inventory Items</div>
+        <div class="stat-value" id="s-inv">0</div>
+        <div class="stat-meta">Total units tracked</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Recent Complaints <span>Latest 5</span></div>
+      <button class="btn btn-sm" onclick="showPage('complaints', document.querySelectorAll('.nav-item')[2])">View All →</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Name</th>
+            <th>Desk</th>
+            <th>Issue</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="dashRecentBody">
+          <tr><td colspan="6" class="empty-state"><p>No complaints yet</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── COMPLAINTS PAGE ─── -->
+  <div class="page" id="page-complaints">
+    <div class="section-header">
+      <div class="section-title">All Complaints</div>
+      <div class="filter-bar">
+        <input type="text" id="complaintsSearch" placeholder="Search tickets..." oninput="renderComplaints()">
+        <select id="statusFilter" onchange="renderComplaints()">
+          <option value="">All Status</option>
+          <option>Open</option>
+          <option>In Progress</option>
+          <option>Resolved</option>
+        </select>
+        <select id="priorityFilter" onchange="renderComplaints()">
+          <option value="">All Priority</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+        <button class="btn btn-sm btn-primary" onclick="openAddComplaintModal()">+ Add Manual</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>Date</th>
+            <th>Employee</th>
+            <th>Desk</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="complaintsBody">
+          <tr><td colspan="8" class="empty-state"><p>Loading…</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── INVENTORY PAGE ─── -->
+  <div class="page" id="page-inventory">
+    <div class="section-header">
+      <div class="section-title">Inventory</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" id="invSearch" placeholder="Search items..." oninput="renderInventory()"
+          style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 12px;outline:none;height:34px;width:180px;">
+        <button class="btn btn-sm btn-primary" onclick="openAddItemModal()">+ Add Item</button>
+      </div>
+    </div>
+    <div class="inv-grid" id="inventoryGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)">
+        <p style="font-size:14px;margin-top:0.5rem">No inventory items yet. Click "+ Add Item" to get started.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CATEGORIES PAGE ─── -->
+  <div class="page" id="page-categories">
+    <div class="section-header">
+      <div class="section-title">Inventory Categories</div>
+      <button class="btn btn-sm btn-primary" onclick="openAddCategoryModal()">+ Add Category</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Category Name</th><th>Icon</th><th>Description</th><th>Items Count</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="categoriesBody">
+          <tr><td colspan="5" class="empty-state"><p>No categories yet</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── DESK TRACKER PAGE ─── -->
+  <div class="page" id="page-desks">
+    <div class="section-header">
+      <div class="section-title">Desk Tracker <span>Click a desk to assign items</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="text" id="deskSearch" placeholder="Search desk..." oninput="renderDesks()"
+          style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 12px;outline:none;height:34px;width:160px;">
+        <button class="btn btn-sm btn-primary" onclick="openAddDeskModal()">+ Add Desk</button>
+      </div>
+    </div>
+
+    <!-- Two-column layout: desk list left, detail panel right -->
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start;">
+
+      <!-- Desk list -->
+      <div class="table-wrap" style="overflow:hidden">
+        <div style="padding:0.65rem 1rem;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3)">
+          All Desks
+        </div>
+        <div id="deskList" style="max-height:600px;overflow-y:auto">
+          <div class="empty-state" style="padding:2rem"><p>No desks added yet</p></div>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      <div class="table-wrap" id="deskDetailPanel">
+        <div style="text-align:center;padding:4rem 2rem;color:var(--text3)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:0.75rem;opacity:0.4"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          <p style="font-size:14px">Select a desk to view and assign items</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<!-- ─── MODALS ─── -->
+
+<!-- Add Desk -->
+<div class="modal-overlay" id="addDeskModal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">
+      <span>Add New Desk</span>
+      <span class="modal-close" onclick="closeModal('addDeskModal')">×</span>
+    </div>
+    <div class="form-group">
+      <label>Desk Number *</label>
+      <input type="text" id="newDeskNo" placeholder="e.g. A-204, B-101, Floor2-C3">
+    </div>
+    <div class="form-group">
+      <label>Employee Name <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input type="text" id="newDeskEmp" placeholder="Who sits here?">
+    </div>
+    <div class="form-group">
+      <label>Notes <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input type="text" id="newDeskNotes" placeholder="e.g. Corner desk, near window">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('addDeskModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewDesk()">Add Desk</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODALS (existing) ─── -->
+
+<!-- Add / Edit Inventory Item -->
+<div class="modal-overlay" id="itemModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="itemModalTitle">Add Inventory Item</span>
+      <span class="modal-close" onclick="closeModal('itemModal')">×</span>
+    </div>
+    <div class="modal-row">
+      <div class="form-group">
+        <label>Item Name *</label>
+        <input type="text" id="iName" placeholder="e.g. Dell Monitor">
+      </div>
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="iCategory">
+          <option value="">Select category</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="form-group">
+        <label>Quantity *</label>
+        <input type="number" id="iQty" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Condition</label>
+        <select id="iCondition">
+          <option>Good</option>
+          <option>Fair</option>
+          <option>Poor</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Model / Serial Info</label>
+      <input type="text" id="iModel" placeholder="e.g. P2422H, Core i5-12400">
+    </div>
+    <div class="form-group">
+      <label>Location / Rack</label>
+      <input type="text" id="iLocation" placeholder="e.g. IT Room, Shelf B">
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="iNotes" placeholder="Any additional notes..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('itemModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Category -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>Add Category</span>
+      <span class="modal-close" onclick="closeModal('categoryModal')">×</span>
+    </div>
+    <div class="modal-row">
+      <div class="form-group">
+        <label>Category Name *</label>
+        <input type="text" id="cName" placeholder="e.g. Monitors">
+      </div>
+      <div class="form-group">
+        <label>Emoji Icon</label>
+        <input type="text" id="cIcon" placeholder="🖥️" maxlength="4">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <input type="text" id="cDesc" placeholder="Brief description of this category">
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('categoryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Add Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- Complaint Detail / Edit -->
+<div class="modal-overlay" id="complaintModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">
+      <span id="complaintModalTitle">Ticket Details</span>
+      <span class="modal-close" onclick="closeModal('complaintModal')">×</span>
+    </div>
+    <div id="complaintDetail"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('complaintModal')">Close</button>
+      <button class="btn btn-primary" onclick="updateComplaintStatus()">Update Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Manual Complaint -->
+<div class="modal-overlay" id="addComplaintModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>Add Manual Complaint</span>
+      <span class="modal-close" onclick="closeModal('addComplaintModal')">×</span>
+    </div>
+    <div class="modal-row">
+      <div class="form-group">
+        <label>Employee Name *</label>
+        <input type="text" id="acName" placeholder="Full name">
+      </div>
+      <div class="form-group">
+        <label>Desk No. *</label>
+        <input type="text" id="acDesk" placeholder="e.g. B-102">
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="acCategory">
+          <option>Hardware – Computer</option>
+          <option>Hardware – Monitor</option>
+          <option>Network – Internet</option>
+          <option>Software – OS</option>
+          <option>Account – Password</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="acPriority">
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Issue Title *</label>
+      <input type="text" id="acTitle" placeholder="Brief issue summary">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="acDesc" placeholder="Detailed description..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('addComplaintModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveManualComplaint()">Add Complaint</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIGURATION ────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA5SNL9SD1kx7HZthNbFcVR9Br_bRrsI5oHHYklCg7PzXUijE3WSrAAq71kNwg2EWF/exec';
+// ─────────────────────────────────────────────────────────────
+
+// Local state (synced with Google Sheets)
+let complaints = [];
+let inventory = [];
+let categories = [
+  { id: 1, name: 'Computers / Laptops', icon: '💻', desc: 'Desktop and laptop units' },
+  { id: 2, name: 'Monitors / Displays', icon: '🖥️', desc: 'All display units' },
+  { id: 3, name: 'Keyboards & Mice', icon: '⌨️', desc: 'Input peripherals' },
+  { id: 4, name: 'Networking', icon: '🌐', desc: 'Routers, switches, cables' },
+  { id: 5, name: 'Printers / Scanners', icon: '🖨️', desc: 'Print and scan devices' },
+  { id: 6, name: 'Storage Devices', icon: '💾', desc: 'HDDs, SSDs, USB drives' },
+  { id: 7, name: 'Phones / Headsets', icon: '📞', desc: 'Communication devices' },
+  { id: 8, name: 'Cables & Accessories', icon: '🔌', desc: 'Miscellaneous accessories' },
+];
+
+let editingItemId = null;
+let viewingComplaintId = null;
+let selectedDeskId = null;
+let desks = []; // { id, deskNo, empName, notes, items: ['Monitors / Displays', 'Computers / Laptops', ...] }
+
+// ─── Navigation ───────────────────────────────────────────────
+function showPage(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${pageId}`).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+
+  const titles = {
+    dashboard: ['Dashboard', 'IT Administration Overview'],
+    complaints: ['Complaints', 'All submitted helpdesk tickets'],
+    inventory: ['Inventory', 'Equipment and asset tracking'],
+    categories: ['Categories', 'Inventory category management'],
+    desks: ['Desk Tracker', 'What equipment is at each desk'],
+  };
+
+  document.getElementById('topbarTitle').textContent = titles[pageId][0];
+  document.getElementById('topbarSub').textContent = titles[pageId][1];
+
+  if (pageId === 'complaints') renderComplaints();
+  if (pageId === 'inventory') renderInventory();
+  if (pageId === 'categories') renderCategories();
+  if (pageId === 'dashboard') renderDashboard();
+  if (pageId === 'desks') renderDesks();
+
+  closeSidebar();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+}
+
+// ─── Sync with Google Sheets ──────────────────────────────────
+async function syncData() {
+  try {
+    const url = `${APPS_SCRIPT_URL}?action=getAll&_=${Date.now()}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.complaints) complaints = data.complaints;
+    if (data.inventory)  inventory  = data.inventory;
+    if (data.categories) categories = data.categories;
+    if (data.desks)      desks      = data.desks;
+  } catch(e) {
+    console.log('Using local data');
+  }
+  updateBadges();
+  renderDashboard();
+}
+
+async function postToSheets(action, payload) {
+  try {
+    const params = new URLSearchParams({ action, ...payload });
+    await fetch(`${APPS_SCRIPT_URL}?${params}`, { mode: 'no-cors' });
+  } catch(e) {}
+}
+
+// ─── Stats & badges ───────────────────────────────────────────
+function updateBadges() {
+  const open = complaints.filter(c => c.status === 'Open').length;
+  document.getElementById('openBadge').textContent = open;
+  document.getElementById('openBadge').style.display = open > 0 ? '' : 'none';
+}
+
+function renderDashboard() {
+  const open = complaints.filter(c => c.status === 'Open').length;
+  const inProg = complaints.filter(c => c.status === 'In Progress').length;
+  const resolved = complaints.filter(c => c.status === 'Resolved').length;
+  const totalInv = inventory.reduce((s, i) => s + (parseInt(i.qty) || 0), 0);
+
+  document.getElementById('s-open').textContent = open;
+  document.getElementById('s-progress').textContent = inProg;
+  document.getElementById('s-resolved').textContent = resolved;
+  document.getElementById('s-inv').textContent = totalInv;
+
+  const recent = [...complaints].sort((a,b) => b.id - a.id).slice(0, 5);
+  const tbody = document.getElementById('dashRecentBody');
+
+  if (recent.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>No complaints yet</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = recent.map(c => `
+    <tr>
+      <td><code style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent)">${c.ticketId || `TKT-${c.id}`}</code></td>
+      <td>${c.empName}</td>
+      <td>${c.deskNo}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.issueTitle || c.category}</td>
+      <td><span class="badge badge-${(c.priority||'low').toLowerCase()}">${c.priority || 'Low'}</span></td>
+      <td><span class="badge ${statusBadgeClass(c.status)}">${c.status || 'Open'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ─── Complaints ───────────────────────────────────────────────
+function renderComplaints() {
+  const search = (document.getElementById('complaintsSearch')?.value || '').toLowerCase();
+  const statusF = document.getElementById('statusFilter')?.value || '';
+  const priorityF = document.getElementById('priorityFilter')?.value || '';
+
+  let filtered = complaints.filter(c => {
+    const matchSearch = !search || [c.empName, c.deskNo, c.category, c.issueTitle, c.ticketId].join(' ').toLowerCase().includes(search);
+    const matchStatus = !statusF || c.status === statusF;
+    const matchPriority = !priorityF || c.priority === priorityF;
+    return matchSearch && matchStatus && matchPriority;
+  }).sort((a,b) => b.id - a.id);
+
+  const tbody = document.getElementById('complaintsBody');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No complaints found</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => `
+    <tr>
+      <td><code style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent)">${c.ticketId || `TKT-${c.id}`}</code></td>
+      <td style="color:var(--text2);font-size:12px">${c.timestamp ? c.timestamp.substring(0,10) : '—'}</td>
+      <td>${c.empName}</td>
+      <td>${c.deskNo}</td>
+      <td><span class="badge-cat">${c.category?.split(' – ')[0] || c.category}</span></td>
+      <td><span class="badge badge-${(c.priority||'low').toLowerCase()}">${c.priority || 'Low'}</span></td>
+      <td>
+        <select class="badge" style="background:transparent;border:none;cursor:pointer;color:inherit;font-family:'DM Sans',sans-serif;font-size:11px;"
+          onchange="quickUpdateStatus(${c.id}, this.value)" onclick="event.stopPropagation()">
+          <option ${c.status==='Open'?'selected':''}>Open</option>
+          <option ${c.status==='In Progress'?'selected':''}>In Progress</option>
+          <option ${c.status==='Resolved'?'selected':''}>Resolved</option>
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-sm" onclick="viewComplaint(${c.id})">View</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteComplaint(${c.id})" style="margin-left:4px">×</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function statusBadgeClass(s) {
+  if (s === 'Resolved') return 'badge-resolved';
+  if (s === 'In Progress') return 'badge-progress';
+  return 'badge-open';
+}
+
+function viewComplaint(id) {
+  const c = complaints.find(x => x.id === id);
+  if (!c) return;
+  viewingComplaintId = id;
+
+  const rows = [
+    ['Ticket ID', `<code style="font-family:'Space Mono',monospace;color:var(--accent)">${c.ticketId || `TKT-${c.id}`}</code>`],
+    ['Date', c.timestamp || '—'],
+    ['Employee', c.empName],
+    ['Desk No.', c.deskNo],
+    ['Department', c.department || '—'],
+    ['Category', c.category],
+    ['Priority', `<span class="badge badge-${(c.priority||'low').toLowerCase()}">${c.priority||'Low'}</span>`],
+    ['Status', `<select id="detailStatus" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:3px 8px;outline:none">
+      <option ${c.status==='Open'?'selected':''}>Open</option>
+      <option ${c.status==='In Progress'?'selected':''}>In Progress</option>
+      <option ${c.status==='Resolved'?'selected':''}>Resolved</option>
+    </select>`],
+    ['Issue', `<strong>${c.issueTitle || '—'}</strong>`],
+    ['Description', `<span style="line-height:1.6">${c.description || '—'}</span>`],
+  ];
+
+  document.getElementById('complaintModalTitle').textContent = c.ticketId || `TKT-${c.id}`;
+  document.getElementById('complaintDetail').innerHTML = rows.map(([l, v]) => `
+    <div class="detail-row"><div class="detail-label">${l}</div><div class="detail-value">${v}</div></div>
+  `).join('');
+
+  document.getElementById('complaintModal').classList.add('open');
+}
+
+function updateComplaintStatus() {
+  const newStatus = document.getElementById('detailStatus').value;
+  const c = complaints.find(x => x.id === viewingComplaintId);
+  if (!c) return;
+  c.status = newStatus;
+  postToSheets('updateStatus', { ticketId: c.ticketId || c.id, status: newStatus });
+  updateBadges();
+  renderComplaints();
+  renderDashboard();
+  closeModal('complaintModal');
+}
+
+function quickUpdateStatus(id, status) {
+  const c = complaints.find(x => x.id === id);
+  if (!c) return;
+  c.status = status;
+  postToSheets('updateStatus', { ticketId: c.ticketId || id, status });
+  updateBadges();
+  renderDashboard();
+}
+
+function deleteComplaint(id) {
+  if (!confirm('Delete this ticket?')) return;
+  complaints = complaints.filter(c => c.id !== id);
+  postToSheets('deleteComplaint', { id });
+  updateBadges();
+  renderComplaints();
+  renderDashboard();
+}
+
+function openAddComplaintModal() { document.getElementById('addComplaintModal').classList.add('open'); }
+
+function saveManualComplaint() {
+  const name = document.getElementById('acName').value.trim();
+  const desk = document.getElementById('acDesk').value.trim();
+  const title = document.getElementById('acTitle').value.trim();
+  if (!name || !desk || !title) return alert('Please fill required fields.');
+
+  const now = new Date();
+  const dateStr = now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const ticketId = `TKT-${dateStr}-${Math.floor(1000+Math.random()*9000)}`;
+
+  const complaint = {
+    id: Date.now(),
+    ticketId,
+    timestamp: now.toLocaleDateString('en-IN'),
+    empName: name,
+    deskNo: desk,
+    department: '—',
+    category: document.getElementById('acCategory').value,
+    priority: document.getElementById('acPriority').value,
+    issueTitle: title,
+    description: document.getElementById('acDesc').value.trim(),
+    status: 'Open',
+  };
+
+  complaints.unshift(complaint);
+  postToSheets('addComplaint', complaint);
+  updateBadges();
+  renderComplaints();
+  renderDashboard();
+  closeModal('addComplaintModal');
+  document.getElementById('acName').value = '';
+  document.getElementById('acDesk').value = '';
+  document.getElementById('acTitle').value = '';
+  document.getElementById('acDesc').value = '';
+}
+
+// ─── Inventory ────────────────────────────────────────────────
+function renderInventory() {
+  const search = (document.getElementById('invSearch')?.value || '').toLowerCase();
+  let items = inventory.filter(i => !search || [i.name, i.category, i.model].join(' ').toLowerCase().includes(search));
+
+  const grid = document.getElementById('inventoryGrid');
+
+  if (items.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)"><p style="font-size:14px;margin-top:0.5rem">No inventory items yet. Click "+ Add Item" to get started.</p></div>';
+    return;
+  }
+
+  const catMap = {};
+  categories.forEach(c => { catMap[c.name] = c.icon; });
+
+  grid.innerHTML = items.map(item => `
+    <div class="inv-card">
+      <div class="inv-card-header">
+        <div class="inv-icon">${catMap[item.category] || '📦'}</div>
+        <div class="inv-card-actions">
+          <button class="btn btn-sm" onclick="openEditItemModal(${item.id})">✏</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})">×</button>
+        </div>
+      </div>
+      <div class="inv-name">${item.name}</div>
+      <div class="inv-category-label">${item.category}</div>
+      ${item.model ? `<div style="font-size:11px;color:var(--text3);margin-top:3px">${item.model}</div>` : ''}
+      ${item.location ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">📍 ${item.location}</div>` : ''}
+      <div class="inv-qty-row">
+        <div>
+          <div class="inv-qty-label">Qty</div>
+          <div class="inv-qty-value">${item.qty}</div>
+        </div>
+        <span class="inv-condition cond-${(item.condition||'good').toLowerCase()}">${item.condition || 'Good'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddItemModal() {
+  editingItemId = null;
+  document.getElementById('itemModalTitle').textContent = 'Add Inventory Item';
+  document.getElementById('iName').value = '';
+  document.getElementById('iQty').value = '';
+  document.getElementById('iModel').value = '';
+  document.getElementById('iLocation').value = '';
+  document.getElementById('iNotes').value = '';
+  populateCategorySelect();
+  document.getElementById('itemModal').classList.add('open');
+}
+
+function openEditItemModal(id) {
+  const item = inventory.find(i => i.id === id);
+  if (!item) return;
+  editingItemId = id;
+  document.getElementById('itemModalTitle').textContent = 'Edit Item';
+  document.getElementById('iName').value = item.name;
+  document.getElementById('iQty').value = item.qty;
+  document.getElementById('iModel').value = item.model || '';
+  document.getElementById('iLocation').value = item.location || '';
+  document.getElementById('iNotes').value = item.notes || '';
+  populateCategorySelect(item.category);
+  document.getElementById('iCondition').value = item.condition || 'Good';
+  document.getElementById('itemModal').classList.add('open');
+}
+
+function populateCategorySelect(selected) {
+  const sel = document.getElementById('iCategory');
+  sel.innerHTML = '<option value="">Select category</option>' +
+    categories.map(c => `<option ${c.name === selected ? 'selected' : ''}>${c.name}</option>`).join('');
+}
+
+function saveItem() {
+  const name = document.getElementById('iName').value.trim();
+  const qty = document.getElementById('iQty').value;
+  const cat = document.getElementById('iCategory').value;
+  if (!name || !qty || !cat) return alert('Please fill required fields.');
+
+  const item = {
+    id: editingItemId || Date.now(),
+    name,
+    category: cat,
+    qty: parseInt(qty),
+    condition: document.getElementById('iCondition').value,
+    model: document.getElementById('iModel').value.trim(),
+    location: document.getElementById('iLocation').value.trim(),
+    notes: document.getElementById('iNotes').value.trim(),
+  };
+
+  if (editingItemId) {
+    inventory = inventory.map(i => i.id === editingItemId ? item : i);
+    postToSheets('updateInventory', item);
+  } else {
+    inventory.unshift(item);
+    postToSheets('addInventory', item);
+  }
+
+  renderInventory();
+  renderDashboard();
+  closeModal('itemModal');
+}
+
+function deleteItem(id) {
+  if (!confirm('Remove this item from inventory?')) return;
+  inventory = inventory.filter(i => i.id !== id);
+  postToSheets('deleteInventory', { id });
+  renderInventory();
+  renderDashboard();
+}
+
+// ─── Categories ───────────────────────────────────────────────
+function renderCategories() {
+  const tbody = document.getElementById('categoriesBody');
+  if (categories.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No categories yet</p></td></tr>';
+    return;
+  }
+  tbody.innerHTML = categories.map(c => {
+    const count = inventory.filter(i => i.category === c.name).length;
+    return `<tr>
+      <td><strong>${c.name}</strong></td>
+      <td style="font-size:20px">${c.icon || '📦'}</td>
+      <td style="color:var(--text2)">${c.desc || '—'}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)">${count}</span></td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="deleteCategory(${c.id})">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddCategoryModal() {
+  document.getElementById('cName').value = '';
+  document.getElementById('cIcon').value = '';
+  document.getElementById('cDesc').value = '';
+  document.getElementById('categoryModal').classList.add('open');
+}
+
+function saveCategory() {
+  const name = document.getElementById('cName').value.trim();
+  const icon = document.getElementById('cIcon').value.trim() || '📦';
+  const desc = document.getElementById('cDesc').value.trim();
+  if (!name) return alert('Category name is required.');
+  const cat = { id: Date.now(), name, icon, desc };
+  categories.push(cat);
+  postToSheets('addCategory', cat);
+  renderCategories();
+  closeModal('categoryModal');
+}
+
+function deleteCategory(id) {
+  if (!confirm('Delete this category?')) return;
+  categories = categories.filter(c => c.id !== id);
+  renderCategories();
+}
+
+// ─── DESK TRACKER ─────────────────────────────────────────────
+
+function renderDesks() {
+  const search = (document.getElementById('deskSearch')?.value || '').toLowerCase();
+  const filtered = desks.filter(d =>
+    !search ||
+    d.deskNo.toLowerCase().includes(search) ||
+    (d.empName || '').toLowerCase().includes(search)
+  );
+
+  const list = document.getElementById('deskList');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state" style="padding:2rem"><p>${search ? 'No desks match' : 'No desks added yet'}</p></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(d => {
+    const itemCount = (d.items || []).length;
+    const isSelected = d.id === selectedDeskId;
+    return `
+      <div onclick="selectDesk(${d.id})" style="
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        background: ${isSelected ? 'var(--accent-glow)' : 'transparent'};
+        border-left: 3px solid ${isSelected ? 'var(--accent)' : 'transparent'};
+        transition: all 0.1s;
+      ">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:14px;font-weight:600;color:${isSelected ? 'var(--accent)' : 'var(--text)'};font-family:'Space Mono',monospace">
+            ${d.deskNo}
+          </div>
+          <span style="font-size:11px;background:var(--surface3);color:var(--text3);padding:2px 7px;border-radius:100px">
+            ${itemCount} item${itemCount !== 1 ? 's' : ''}
+          </span>
+        </div>
+        ${d.empName ? `<div style="font-size:12px;color:var(--text2);margin-top:2px">${d.empName}</div>` : ''}
+        ${d.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">${d.notes}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectDesk(id) {
+  selectedDeskId = id;
+  renderDesks();
+  renderDeskDetail(id);
+}
+
+function renderDeskDetail(id) {
+  const desk = desks.find(d => d.id === id);
+  if (!desk) return;
+
+  const panel = document.getElementById('deskDetailPanel');
+  const deskItems = desk.items || [];
+
+  // Build category checklist from all categories
+  const catMap = {};
+  categories.forEach(c => { catMap[c.name] = c.icon || '📦'; });
+
+  const allCatNames = categories.map(c => c.name);
+
+  const checklistHTML = allCatNames.length === 0
+    ? `<p style="color:var(--text3);font-size:13px">No categories defined yet. Add categories first.</p>`
+    : allCatNames.map(name => {
+        const checked = deskItems.includes(name);
+        const icon = catMap[name] || '📦';
+        return `
+          <label style="
+            display:flex;align-items:center;gap:12px;
+            padding:0.65rem 0;
+            border-bottom:1px solid var(--border);
+            cursor:pointer;
+            transition:background 0.1s;
+          ">
+            <div style="
+              width:20px;height:20px;border-radius:5px;flex-shrink:0;
+              border:1.5px solid ${checked ? 'var(--accent)' : 'var(--border2)'};
+              background:${checked ? 'var(--accent)' : 'transparent'};
+              display:flex;align-items:center;justify-content:center;
+              transition:all 0.15s;
+            ">
+              ${checked ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+            </div>
+            <input type="checkbox" ${checked ? 'checked' : ''} data-cat="${name}"
+              onchange="toggleDeskItem(${id}, '${name}', this.checked)"
+              style="display:none">
+            <span style="font-size:18px">${icon}</span>
+            <span style="font-size:14px;color:var(--text)">${name}</span>
+          </label>
+        `;
+      }).join('');
+
+  panel.innerHTML = `
+    <div style="padding:1rem 1.25rem;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent)">
+          ${desk.deskNo}
+        </div>
+        ${desk.empName ? `<div style="font-size:12px;color:var(--text2);margin-top:2px">👤 ${desk.empName}</div>` : ''}
+        ${desk.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">${desk.notes}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" onclick="openEditDeskModal(${id})">Edit Info</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteDesk(${id})">Delete Desk</button>
+      </div>
+    </div>
+
+    <div style="padding:1rem 1.25rem">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem">
+        Assigned Items — tick what's present at this desk
+      </div>
+      ${checklistHTML}
+
+      ${deskItems.length > 0 ? `
+        <div style="margin-top:1rem;padding:0.75rem 1rem;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Summary</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${deskItems.map(item => {
+              const icon = catMap[item] || '📦';
+              return `<span style="font-size:12px;background:var(--surface3);border:1px solid var(--border2);color:var(--text2);padding:3px 10px;border-radius:100px">${icon} ${item}</span>`;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function toggleDeskItem(deskId, categoryName, isChecked) {
+  const desk = desks.find(d => d.id === deskId);
+  if (!desk) return;
+  if (!desk.items) desk.items = [];
+
+  if (isChecked) {
+    if (!desk.items.includes(categoryName)) desk.items.push(categoryName);
+  } else {
+    desk.items = desk.items.filter(i => i !== categoryName);
+  }
+
+  // Save to sheets
+  postToSheets('updateDesk', { id: deskId, items: desk.items.join('||') });
+
+  // Re-render detail (keeps checklist in sync visually)
+  renderDeskDetail(deskId);
+  renderDesks();
+}
+
+function openAddDeskModal() {
+  document.getElementById('newDeskNo').value = '';
+  document.getElementById('newDeskEmp').value = '';
+  document.getElementById('newDeskNotes').value = '';
+  document.getElementById('addDeskModal').classList.add('open');
+}
+
+function openEditDeskModal(id) {
+  const desk = desks.find(d => d.id === id);
+  if (!desk) return;
+  document.getElementById('newDeskNo').value = desk.deskNo;
+  document.getElementById('newDeskEmp').value = desk.empName || '';
+  document.getElementById('newDeskNotes').value = desk.notes || '';
+  // Reuse modal but switch save to edit
+  document.querySelector('#addDeskModal .btn-primary').setAttribute('onclick', `saveEditDesk(${id})`);
+  document.getElementById('addDeskModal').classList.add('open');
+}
+
+function saveNewDesk() {
+  const deskNo = document.getElementById('newDeskNo').value.trim();
+  if (!deskNo) return alert('Desk number is required.');
+  if (desks.find(d => d.deskNo.toLowerCase() === deskNo.toLowerCase())) {
+    return alert('A desk with this number already exists.');
+  }
+
+  const desk = {
+    id: Date.now(),
+    deskNo,
+    empName: document.getElementById('newDeskEmp').value.trim(),
+    notes: document.getElementById('newDeskNotes').value.trim(),
+    items: [],
+  };
+
+  desks.push(desk);
+  desks.sort((a, b) => a.deskNo.localeCompare(b.deskNo, undefined, { numeric: true }));
+  postToSheets('addDesk', { id: desk.id, deskNo: desk.deskNo, empName: desk.empName, notes: desk.notes, items: '' });
+  closeModal('addDeskModal');
+  renderDesks();
+  // Reset save button
+  document.querySelector('#addDeskModal .btn-primary').setAttribute('onclick', 'saveNewDesk()');
+}
+
+function saveEditDesk(id) {
+  const desk = desks.find(d => d.id === id);
+  if (!desk) return;
+  desk.deskNo  = document.getElementById('newDeskNo').value.trim() || desk.deskNo;
+  desk.empName = document.getElementById('newDeskEmp').value.trim();
+  desk.notes   = document.getElementById('newDeskNotes').value.trim();
+  postToSheets('updateDesk', { id, deskNo: desk.deskNo, empName: desk.empName, notes: desk.notes, items: (desk.items||[]).join('||') });
+  closeModal('addDeskModal');
+  document.querySelector('#addDeskModal .btn-primary').setAttribute('onclick', 'saveNewDesk()');
+  renderDesks();
+  if (selectedDeskId === id) renderDeskDetail(id);
+}
+
+function deleteDesk(id) {
+  if (!confirm('Delete this desk and all its assignments?')) return;
+  desks = desks.filter(d => d.id !== id);
+  selectedDeskId = null;
+  document.getElementById('deskDetailPanel').innerHTML = `
+    <div style="text-align:center;padding:4rem 2rem;color:var(--text3)">
+      <p style="font-size:14px">Select a desk to view and assign items</p>
+    </div>`;
+  postToSheets('deleteDesk', { id });
+  renderDesks();
+}
+
+// ─── Modals ───────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+// ─── Init ─────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  updateBadges();
+  renderDashboard();
+  syncData();
+});
+</script>
+</body>
+</html>
